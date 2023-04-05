@@ -1,1 +1,1 @@
-web: gunicorn visu_velo_web:app
+web: gunicorn visu_velo_web:app --log-file=-
