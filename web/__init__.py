@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Flask
 
 
@@ -6,6 +8,7 @@ def create_app():
 
     @app.route('/')
     def home():
-        return "Hello Visu Velo"
+        time = datetime.datetime.now()
+        return f"Hello Visu Velo at {time}"
 
     return app
