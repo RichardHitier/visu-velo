@@ -6,6 +6,6 @@ def create_app():
 
     @app.route('/')
     def home():
-        return "hello visu velo"
+        return "Hello Visu Velo"
 
     return app
