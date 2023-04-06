@@ -9,6 +9,6 @@ def create_app():
     @app.route('/')
     def home():
         time = datetime.datetime.now()
-        return f"Hello Visu Velo at {time}"
+        return f"Hello user at {time}"
 
     return app
