@@ -4,3 +4,5 @@ matplotlib
 bokeh
 flask
 gunicorn
+pre-commit
+flake8
