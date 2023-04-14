@@ -132,7 +132,9 @@ def create_app():
 
         df["date"] = pd.to_datetime(df["date"], dayfirst=True)
         dates = df["date"].tolist()
-        values = df["Deniv"].tolist()
-        return render_template("chartjs.html", dates=dates, values=values)
+        deniv = df["Deniv"].tolist()
+        km = df["km"].tolist()
+        print(df["date"])
+        return render_template("chartjs.html", dates=dates, deniv=deniv, km=km)
 
     return app
