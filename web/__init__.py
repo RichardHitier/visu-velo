@@ -125,4 +125,14 @@ def create_app():
             css_resources=INLINE.render_css(),
         ).encode(encoding="UTF-8")
 
+    @app.route("/chartjs")
+    def chartjs():
+        fichier = "parcours.csv"
+        df = pd.read_csv(fichier, sep=";")
+
+        df["date"] = pd.to_datetime(df["date"], dayfirst=True)
+        dates = df["date"].tolist()
+        values = df["Deniv"].tolist()
+        return render_template("chartjs.html", dates=dates, values=values)
+
     return app

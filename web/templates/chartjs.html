@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Graphique avec Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="chart1"></canvas>
+
+    <script>
+        // Récupérer les données de Flask
+        const dates = {{ dates|tojson }};
+        const values = {{ values|tojson }};
+
+        // Convertir les dates en objets Date
+        const dateObjects = dates.map(function(date) {
+            return new Date(date);
+        });
+
+        // Créer un nouveau graphique avec Chart.js
+        const ctx = document.getElementById('chart1');
+
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: dates,
+              datasets: [{
+                label: 'm de dénivelé',
+                data: values,
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: false
+                }
+              }
+            }
+          });
+    </script>
+</body>
+</html>
