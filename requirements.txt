@@ -4,3 +4,7 @@ matplotlib
 bokeh
 flask
 gunicorn
+odfpy
+jupyterlab_vim
+pyarrow
+gpxpy
