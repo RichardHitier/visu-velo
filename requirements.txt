@@ -8,3 +8,4 @@ odfpy
 jupyterlab_vim
 pyarrow
 gpxpy
+scipy
