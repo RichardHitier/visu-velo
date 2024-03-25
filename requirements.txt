@@ -9,3 +9,4 @@ jupyterlab_vim
 pyarrow
 gpxpy
 scipy
+jupyter_nbextensions_configurator
