@@ -128,5 +128,5 @@ def show_resume(my_df):
     ax3.tick_params(axis='x', which='major', length=1.1, pad=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
 
-    plt.show()
+    return fig
 
