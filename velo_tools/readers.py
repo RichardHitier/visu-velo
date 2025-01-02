@@ -12,10 +12,15 @@ def ods_to_df(file_path):
     my_df.dropna(inplace=True)
     my_df.index = pd.to_datetime(my_df.index)
 
-    one_week_before = my_df.index[0] - datetime.timedelta(weeks=1)
-    one_week_after = my_df.index[-1] + datetime.timedelta(weeks=1)
+    # start_year =  my_df.index[0]
+    start_year = my_df.index[0].year
+    start_date = datetime.datetime(start_year, 11, 1)
+    stop_date = datetime.datetime(start_year +1, 10, 31)
 
-    alldays_idx = pd.date_range(start=one_week_before, end=my_df.index[-1], freq='D')
+    one_week_before = start_date - datetime.timedelta(weeks=1)
+    one_week_after = stop_date + datetime.timedelta(weeks=1)
+
+    alldays_idx = pd.date_range(start=one_week_before, end=one_week_after, freq='D')
     df_reindexed = my_df.reindex(alldays_idx)
 
     return df_reindexed
