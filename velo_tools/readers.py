@@ -8,7 +8,7 @@ def ods_to_df(file_path):
     pd.set_option('expand_frame_repr', False)
     pd.set_option('display.max_rows', None)
 
-    my_df.drop(my_df.columns[[0, 1, 2, 3, 8, 10, 11, 12, 13, 14, 15, 16, 17]], axis=1, inplace=True)
+    my_df = my_df[['type', 'km', 'temps', 'elev', 'zone', 'moy']]
     my_df.dropna(inplace=True)
     my_df.index = pd.to_datetime(my_df.index)
 
