@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from velo_tools.graphers import show_resume
 from velo_tools.readers import ods_to_df, summarize
 
-odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods",
-            "/home/richard/03COMMON/0000velo/ProgrammeCyclo_23-24.ods"]
+# odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods",
+#             "/home/richard/03COMMON/0000velo/ProgrammeCyclo_23-24.ods"]
+odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods"]
 
 
 def plot_file(filename):
