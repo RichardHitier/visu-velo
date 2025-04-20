@@ -5,13 +5,13 @@ import locale
 
 
 def show_resume(my_df):
-
     km_df = my_df['km']
     moy_df = my_df['moy']
     type_df = my_df['type']
     elev_df = my_df['elev']
     kmsum_df = my_df['week_sum']
 
+    # print(type_df)
     num_plots = 3
 
     locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
@@ -25,11 +25,12 @@ def show_resume(my_df):
                    "hiit": "#f10d0c",
                    "spec": "#afd095",
                    "deniv": "#ff972f",
+                   "puissance": "#cc7a25",
+                   "force": "#b80a09",
                    "course": "#009900"}
 
     monday_idx = pd.date_range(start=km_df.index[0], end=km_df.index[-1], freq=pd.offsets.Week(weekday=0))
 
-    # print(moy_df)
     fig, ax = plt.subplots(num_plots, figsize=(20, 8), sharex=True)
 
     # Show Elevation
@@ -88,8 +89,17 @@ def show_resume(my_df):
 
     ax2.set_ylabel('V. moy. (km/h)', color=color, fontsize=label_fontsize,
                    loc="top")  # we already handled the x-label with ax1
-    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=5), color="red", lw=2, zorder=-4)
-    # ax2.plot(moy_df.index, moy_df, color="red", lw=2, zorder=-4)
+    ## Spline 3
+    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=3), color="red", lw=2, zorder=-4)
+    ## Claude Cubic
+    # ax2.plot(moy_df.index, moy_df.interpolate(method="cubic"), color="red", lw=2, zorder=-4)
+    ## Claude PCHip
+    # from scipy import interpolate
+    # f = interpolate.PchipInterpolator(moy_df.dropna().index, moy_df.dropna())
+    # ax2.plot(moy_df.index, f(moy_df.index), color="red", lw=2, zorder=-4)
+    ## Claude polynomial
+    # ax2.plot(moy_df.index, moy_df.interpolate(method="polynomial", order=2), color="red", lw=2, zorder=-4)
+
     ax2.scatter(moy_df.index, moy_df, marker="*", zorder=3, color="lightgreen", edgecolor="black", lw=0.5, s=120)
     ax2.tick_params(axis='y', labelcolor=color, labelsize=label_fontsize - 5)
 
@@ -129,4 +139,3 @@ def show_resume(my_df):
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
 
     return fig
-
