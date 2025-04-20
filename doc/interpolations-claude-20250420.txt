@@ -1,0 +1,39 @@
+
+Le problème que vous observez avec la méthode "spline" d'ordre 5 est typique de
+l'interpolation polynomiale de degré élevé, qui peut créer des oscillations
+extrêmes (phénomène de Runge) et des valeurs aberrantes, surtout aux extrémités
+des données.
+
+Pour une courbe de vitesse moyenne plus réaliste, je vous recommande d'essayer ces alternatives :
+
+1. **Interpolation cubique** (moins agressive que spline d'ordre 5) :
+```python
+ax2.plot(moy_df.index, moy_df.interpolate(method="cubic"), color="red", lw=2, zorder=-4)
+```
+
+2. **Spline de degré inférieur** (3 au lieu de 5) :
+```python
+ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=3), color="red", lw=2, zorder=-4)
+```
+
+3. **Interpolation polynomiale d'ordre inférieur** (moins d'oscillations) :
+```python
+ax2.plot(moy_df.index, moy_df.interpolate(method="polynomial", order=2), color="red", lw=2, zorder=-4)
+```
+
+4. **Méthode PCHIP** (préserve la monotonie) - très utile pour les vitesses :
+```python
+from scipy import interpolate
+f = interpolate.PchipInterpolator(moy_df.dropna().index, moy_df.dropna())
+ax2.plot(moy_df.index, f(moy_df.index), color="red", lw=2, zorder=-4)
+```
+
+5. **Lissage par moyenne mobile** (moins précis mais plus stable) :
+```python
+window = 3  # Ajustez selon vos besoins
+ax2.plot(moy_df.index, moy_df.rolling(window=window, center=True).mean().interpolate(), color="red", lw=2, zorder=-4)
+```
+
+Pour les données de vitesse, la méthode PCHIP ou l'interpolation cubique sont
+généralement les plus adaptées car elles produisent des courbes lisses sans les
+oscillations extrêmes des splines d'ordre supérieur.
