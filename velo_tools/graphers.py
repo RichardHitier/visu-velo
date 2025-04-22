@@ -66,8 +66,8 @@ def show_resume(my_df):
     # ax1.set_xlabel("Lundis", fontsize=label_fontsize, labelpad=5.0, loc="left")
 
     # Different bar color depending on block type
-    for type, type_color in block_types.items():
-        mask_type = type_df == type
+    for block_type, type_color in block_types.items():
+        mask_type = type_df == block_type
         km_index = km_df.index[mask_type]
         km_values = km_df[mask_type]
         bar_container = ax1.bar(km_index, km_values, color=type_color, width=0.9, edgecolor="black", linewidth=0.5)
