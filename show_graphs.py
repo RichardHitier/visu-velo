@@ -5,10 +5,6 @@ import matplotlib.pyplot as plt
 from velo_tools.graphers import show_resume
 from velo_tools.readers import ods_to_df, summarize
 
-# odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods",
-#             "/home/richard/03COMMON/0000velo/ProgrammeCyclo_23-24.ods"]
-odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods"]
-
 
 def plot_file(filename, _show_to_screen=False):
     my_df = ods_to_df(filename)
@@ -27,10 +23,16 @@ def plot_file(filename, _show_to_screen=False):
         print(f"Saved figure into {image_filename}")
 
 
-for f in odsfiles:
+if __name__ == "__main__":
     import sys
+
+    odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods",
+                "/home/richard/03COMMON/0000velo/ProgrammeCyclo_23-24.ods"]
 
     show_to_screen = False
     if len(sys.argv) == 2 and sys.argv[1] == 'show':
         show_to_screen = True
-    plot_file(f, show_to_screen)
+
+    for f in odsfiles:
+
+        plot_file(f, show_to_screen)
