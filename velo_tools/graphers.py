@@ -69,9 +69,10 @@ def show_resume(my_df):
 
     # 1- fill in NaN type
     type_df.fillna("inconnu", inplace=True)
+    default_color = '#88e788'
 
     # 2- then apply color logic
-    colors = type_df.map(lambda x: type_colors.get(x, 'black'))
+    colors = type_df.map(lambda x: type_colors.get(x, default_color))
 
     # 3- draw km bars
     ax1.bar(km_df.index, km_df, color=colors, width=0.9, edgecolor="black", linewidth=0.5)
@@ -114,7 +115,8 @@ def show_resume(my_df):
 
     bar_container = ax3.bar(kmsum_df.index, kmsum_df, color='#1455C5', align='edge', width=2, zorder=2, edgecolor="black")
 
-    ax3.bar_label(bar_container, label_type="edge", padding=10, zorder=8, color="black", fontsize=15)
+    kmsum_labels = [f"{int(v)}" if pd.notna(v) else "" for v in kmsum_df]
+    ax3.bar_label(bar_container, labels=kmsum_labels, label_type="edge", padding=10, zorder=8, color="black", fontsize=15)
     # show start of weeks
     for monday in monday_idx:
         ax3.axvline(monday, color='black', lw=0.5, alpha=0.5, linestyle='-')
