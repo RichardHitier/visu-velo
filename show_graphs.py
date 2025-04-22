@@ -26,13 +26,28 @@ def plot_file(filename, _show_to_screen=False):
 if __name__ == "__main__":
     import sys
 
+
+    def my_help(msg):
+        print(msg)
+        sys.exit(0)
+
+
     odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods",
                 "/home/richard/03COMMON/0000velo/ProgrammeCyclo_23-24.ods"]
 
-    show_to_screen = False
-    if len(sys.argv) == 2 and sys.argv[1] == 'show':
-        show_to_screen = True
+    if len(sys.argv) < 3:
+        my_help("Give all args")
 
-    for f in odsfiles:
+    display_mode = sys.argv[1]
+    num_plots = sys.argv[2]
 
+    if display_mode not in ["show", "save"]:
+        my_help("First arg should be 'show' or 'save'")
+
+    if num_plots not in ["1", "2"]:
+        my_help("Second arg should be '1' or '2'")
+
+    max_files = int(num_plots)
+    show_to_screen = display_mode == "show"
+    for f in odsfiles[:int(num_plots)]:
         plot_file(f, show_to_screen)
