@@ -19,7 +19,7 @@ def show_resume(my_df):
     label_fontsize = 18
     bar_color = "black"
     moy_color = "red"
-    block_types = {"foncier": "#fff5ce",
+    type_colors = {"foncier": "#fff5ce",
                    "conso": "#ffd428",
                    "recup": "#b4c7dc",
                    "hiit": "#f10d0c",
@@ -66,11 +66,15 @@ def show_resume(my_df):
     # ax1.set_xlabel("Lundis", fontsize=label_fontsize, labelpad=5.0, loc="left")
 
     # Different bar color depending on block type
-    for block_type, type_color in block_types.items():
-        mask_type = type_df == block_type
-        km_index = km_df.index[mask_type]
-        km_values = km_df[mask_type]
-        bar_container = ax1.bar(km_index, km_values, color=type_color, width=0.9, edgecolor="black", linewidth=0.5)
+
+    # 1- fill in NaN type
+    type_df.fillna("inconnu", inplace=True)
+
+    # 2- then apply color logic
+    colors = type_df.map(lambda x: type_colors.get(x, 'black'))
+
+    # 3- draw km bars
+    ax1.bar(km_df.index, km_df, color=colors, width=0.9, edgecolor="black", linewidth=0.5)
 
     ax1.set_ylabel("Distance (km)", color=bar_color, fontsize=label_fontsize, loc="bottom")
     ax1.tick_params(axis='y', labelcolor=bar_color, labelsize=label_fontsize - 5)
