@@ -15,7 +15,7 @@ def ods_to_df(file_path):
     # start_year =  my_df.index[0]
     start_year = my_df.index[0].year
     start_date = datetime.datetime(start_year, 11, 1)
-    stop_date = datetime.datetime(start_year +1, 10, 31)
+    stop_date = datetime.datetime(start_year + 1, 10, 31)
 
     one_week_before = start_date - datetime.timedelta(weeks=1)
     one_week_after = stop_date + datetime.timedelta(weeks=1)
@@ -32,7 +32,6 @@ def summarize(my_df):
     insert a new column with km sum by week
     """
 
-
     # Insert two new columns: week and month (with year)
     my_df["week"] = pd.to_datetime(my_df.index).strftime('%Y-%W')
     # my_df["month"] =  pd.to_datetime(my_df.index).strftime('%Y-%m')
@@ -46,4 +45,3 @@ def summarize(my_df):
 
     my_df["week_sum"] = week_sum["km"]
     return my_df
-
