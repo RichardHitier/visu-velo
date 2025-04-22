@@ -10,7 +10,7 @@ from velo_tools.readers import ods_to_df, summarize
 odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods"]
 
 
-def plot_file(filename):
+def plot_file(filename, _show_to_screen=False):
     my_df = ods_to_df(filename)
 
     summarized_df = summarize(my_df)
@@ -20,9 +20,17 @@ def plot_file(filename):
     root_filename = splitext(basename(filename))[0]
     image_filename = root_filename + ".png"
 
-    fig.savefig(image_filename)
-    print(f"Saved figure into {image_filename}")
+    if _show_to_screen:
+        plt.show()
+    else:
+        fig.savefig(image_filename)
+        print(f"Saved figure into {image_filename}")
 
 
 for f in odsfiles:
-    plot_file(f)
+    import sys
+
+    show_to_screen = False
+    if len(sys.argv) == 2 and sys.argv[1] == 'show':
+        show_to_screen = True
+    plot_file(f, show_to_screen)
