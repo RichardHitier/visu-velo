@@ -70,7 +70,7 @@ def show_resume(my_df):
         mask_type = type_df == type
         km_index = km_df.index[mask_type]
         km_values = km_df[mask_type]
-        bar_container = ax1.bar(km_index, km_values, color=type_color, width=0.8, edgecolor="black")
+        bar_container = ax1.bar(km_index, km_values, color=type_color, width=0.9, edgecolor="black", linewidth=0.5)
 
     ax1.set_ylabel("Distance (km)", color=bar_color, fontsize=label_fontsize, loc="bottom")
     ax1.tick_params(axis='y', labelcolor=bar_color, labelsize=label_fontsize - 5)
@@ -108,7 +108,7 @@ def show_resume(my_df):
     ax3.set_title("Somme distance / semaine (km)", y=1.0, pad=16)
     ax3.title.set_size(15)
 
-    bar_container = ax3.bar(kmsum_df.index, kmsum_df, color='blue', align='edge', width=2, zorder=2, edgecolor="black")
+    bar_container = ax3.bar(kmsum_df.index, kmsum_df, color='#1455C5', align='edge', width=2, zorder=2, edgecolor="black")
 
     ax3.bar_label(bar_container, label_type="edge", padding=10, zorder=8, color="black", fontsize=15)
     # show start of weeks
