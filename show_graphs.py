@@ -43,7 +43,7 @@ if __name__ == "__main__":
     if data_type == 'fit':
         _fit_df = fit_to_df(sys.argv[2])
         fig = plot_fit(_fit_df)
-        fig.savefig('fit.png')
+        plt.show()
         print(f"Saved fot fit.png")
 
     elif data_type == 'bike':
