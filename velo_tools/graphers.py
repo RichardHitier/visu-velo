@@ -5,8 +5,12 @@ import locale
 
 
 def plot_fit(fit_df):
-    fig, ax = plt.subplots(1, figsize=(20, 8), sharex=True)
-    ax.plot(fit_df.index, fit_df.steps)
+    fig, ax1 = plt.subplots(1, figsize=(20, 8), sharex=True)
+    # ax1.plot(fit_df.index, fit_df.steps)
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    ax2.plot(fit_df.index, fit_df.bike_duration, color='red')
+    ax2.plot(fit_df.index, fit_df.walking_duration, color='blue')
+    ax2.plot(fit_df.index, fit_df.running_duration, color='green')
     return fig
 
 
