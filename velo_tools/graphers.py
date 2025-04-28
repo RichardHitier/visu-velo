@@ -4,6 +4,12 @@ import matplotlib.dates as mdates
 import locale
 
 
+def plot_fit(fit_df):
+    fig, ax = plt.subplots(1, figsize=(20, 8), sharex=True)
+    ax.plot(fit_df.index, fit_df.steps)
+    return fig
+
+
 def show_resume(my_df):
     km_df = my_df['km']
     moy_df = my_df['moy']
@@ -113,10 +119,12 @@ def show_resume(my_df):
     ax3.set_title("Somme distance / semaine (km)", y=1.0, pad=16)
     ax3.title.set_size(15)
 
-    bar_container = ax3.bar(kmsum_df.index, kmsum_df, color='#1455C5', align='edge', width=2, zorder=2, edgecolor="black")
+    bar_container = ax3.bar(kmsum_df.index, kmsum_df, color='#1455C5', align='edge', width=2, zorder=2,
+                            edgecolor="black")
 
     kmsum_labels = [f"{int(v)}" if pd.notna(v) else "" for v in kmsum_df]
-    ax3.bar_label(bar_container, labels=kmsum_labels, label_type="edge", padding=10, zorder=8, color="black", fontsize=15)
+    ax3.bar_label(bar_container, labels=kmsum_labels, label_type="edge", padding=10, zorder=8, color="black",
+                  fontsize=15)
     # show start of weeks
     for monday in monday_idx:
         ax3.axvline(monday, color='black', lw=0.5, alpha=0.5, linestyle='-')

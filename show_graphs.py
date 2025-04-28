@@ -2,8 +2,8 @@ from os.path import basename, splitext
 
 import matplotlib.pyplot as plt
 
-from velo_tools.graphers import show_resume
-from velo_tools.readers import ods_to_df, summarize
+from velo_tools.graphers import show_resume, plot_fit
+from velo_tools.readers import ods_to_df, summarize, fit_to_df
 
 
 def plot_file(filename, _show_to_screen=False):
@@ -35,19 +35,30 @@ if __name__ == "__main__":
     odsfiles = ["/home/richard/03COMMON/0000velo/ProgrammeCyclo_24-25.ods",
                 "/home/richard/03COMMON/0000velo/ProgrammeCyclo_23-24.ods"]
 
-    if len(sys.argv) < 3:
-        my_help("Give all args")
+    if len(sys.argv) < 2:
+        my_help("Give at least 2 args")
 
-    display_mode = sys.argv[1]
-    num_plots = sys.argv[2]
+    data_type = sys.argv[1]
 
-    if display_mode not in ["show", "save"]:
-        my_help("First arg should be 'show' or 'save'")
+    if data_type == 'fit':
+        _fit_df = fit_to_df(sys.argv[2])
+        fig = plot_fit(_fit_df)
+        fig.savefig('fit.png')
+        print(f"Saved fot fit.png")
 
-    if num_plots not in ["1", "2"]:
-        my_help("Second arg should be '1' or '2'")
+    elif data_type == 'bike':
+        display_mode = sys.argv[2]
+        num_plots = sys.argv[3]
+        if display_mode not in ["show", "save"]:
+            my_help("First arg should be 'show' or 'save'")
 
-    max_files = int(num_plots)
-    show_to_screen = display_mode == "show"
-    for f in odsfiles[:int(num_plots)]:
-        plot_file(f, show_to_screen)
+        if num_plots not in ["1", "2"]:
+            my_help("Second arg should be '1' or '2'")
+
+        max_files = int(num_plots)
+        show_to_screen = display_mode == "show"
+        for f in odsfiles[:int(num_plots)]:
+            plot_file(f, show_to_screen)
+
+    else:
+        print("First arg should be in [fit, bike]")

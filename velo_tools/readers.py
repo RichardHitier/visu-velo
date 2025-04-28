@@ -26,8 +26,7 @@ def fit_to_df(_fit_path):
                 'running_duration',
                 'fast_walking_duration']
 
-    _fit_df = pd.read_csv(_fit_path, header=0, names=_columns)
-
+    _fit_df = pd.read_csv(_fit_path, header=0, names=_columns, index_col='Date', parse_dates=True)
 
     return _fit_df
 
