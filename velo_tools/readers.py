@@ -2,9 +2,34 @@ import pandas as pd
 import datetime
 
 
-def fit_to_df(fit_path):
-    fit_df = pd.read_csv(fit_path)
-    return fit_df
+def fit_to_df(_fit_path):
+    _columns = ['Date',
+                'activ_min',
+                'calories',
+                'distance',
+                'cardio_pt',
+                'cardio_min',
+                'lat_low',
+                'lon_low',
+                'lat_high',
+                'lon_high',
+                'speed_mean',
+                'speed_max',
+                'speed_min',
+                'steps',
+                'weight_mean',
+                'weight_max',
+                'weight_min',
+                'bike_duration',
+                'idle_duration',
+                'walking_duration',
+                'running_duration',
+                'fast_walking_duration']
+
+    _fit_df = pd.read_csv(_fit_path, header=0, names=_columns)
+
+
+    return _fit_df
 
 
 def ods_to_df(file_path):
@@ -59,4 +84,5 @@ if __name__ == "__main__":
     fit_path = sys.argv[1]
     if not os.path.isfile(fit_path):
         print(f"No such file {fit_path}")
-    print(fit_to_df(fit_path))
+    fit_df = fit_to_df(fit_path)
+    print(fit_df.columns)
