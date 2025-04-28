@@ -2,6 +2,11 @@ import pandas as pd
 import datetime
 
 
+def fit_to_df(fit_path):
+    fit_df = pd.read_csv(fit_path)
+    return fit_df
+
+
 def ods_to_df(file_path):
     my_df = pd.read_excel(file_path, sheet_name="Journal", header=4, index_col=3,
                           parse_dates=True)
@@ -45,3 +50,13 @@ def summarize(my_df):
 
     my_df["week_sum"] = week_sum["km"]
     return my_df
+
+
+if __name__ == "__main__":
+    import sys
+    import os
+
+    fit_path = sys.argv[1]
+    if not os.path.isfile(fit_path):
+        print(f"No such file {fit_path}")
+    print(fit_to_df(fit_path))
