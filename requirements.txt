@@ -11,3 +11,4 @@ gpxpy
 scipy
 import-ipynb @ https://github.com/StuffyMonkey/import-ipynb/archive/refs/heads/master.zip
 jupyter_nbextensions_configurator
+fitparse
