@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -124,6 +125,8 @@ def show_resume(my_df):
     ax3.set_title("Somme distance / semaine (km)", y=1.0, pad=16)
     ax3.title.set_size(15)
 
+    kmsum_df.replace(0, np.nan, inplace=True)
+    kmsum_df.dropna(inplace=True)
     bar_container = ax3.bar(kmsum_df.index, kmsum_df, color='#1455C5', align='edge', width=2, zorder=2,
                             edgecolor="black")
 
