@@ -35,6 +35,7 @@ def show_resume(my_df):
                    "hiit": "#f10d0c",
                    "spec": "#afd095",
                    "deniv": "#ff972f",
+                   "tempo": "#cc7a25",
                    "puissance": "#cc7a25",
                    "force": "#b80a09",
                    "course": "#009900"}
