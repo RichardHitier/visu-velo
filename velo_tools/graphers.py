@@ -88,6 +88,9 @@ def show_resume(my_df):
 
     # 3- draw km bars
     ax1.bar(km_df.index, km_df, color=colors, width=0.9, edgecolor="black", linewidth=0.5)
+    for _dl in [50]:
+        ax1.text(km_df.index[0], _dl + 0.2, f"{_dl} km", color="black", fontsize=12, horizontalalignment="right")
+        ax1.axhline(_dl, color="black", lw=0.8, alpha=1, linestyle='-.')
 
     ax1.set_ylabel("Distance (km)", color=bar_color, fontsize=label_fontsize, loc="bottom")
     ax1.tick_params(axis='y', labelcolor=bar_color, labelsize=label_fontsize - 5)
@@ -101,7 +104,7 @@ def show_resume(my_df):
     ax2.set_ylim([5, 30])
     color = 'tab:red'
     for _hl in [20, 25]:
-        ax2.text(moy_df.index[0], _hl + 0.2, f"{_hl} km/h", color=color, fontsize=12, horizontalalignment="right")
+        ax2.text(moy_df.index[-1], _hl + 0.2, f"{_hl} km/h", color=color, fontsize=12, horizontalalignment="right")
         ax2.axhline(_hl, color=color, lw=0.8, alpha=1, linestyle='--')
 
     ax2.set_ylabel('V. moy. (km/h)', color=color, fontsize=label_fontsize,
