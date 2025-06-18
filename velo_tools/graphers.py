@@ -145,20 +145,21 @@ def show_resume(my_df):
     ax3.set_ylim([0, 180])
 
     # Cumulative plot
+    cumul_color = '#ff4000'
     ax4 = ax3.twinx()  # instantiate a second axes that shares the same x-axis
     cumulated_kms = kmsum_df.cumsum()
-    ax4.plot(kmsum_df.index, cumulated_kms, color='orange', linewidth=2.5, marker='o', zorder=4, label='Cumul (km)')
+    ax4.plot(kmsum_df.index, cumulated_kms, color=cumul_color, linewidth=2.5, marker='o', zorder=4, label='Cumul (km)')
     ax4.set_ylim([0, 3000])
 
     # Title
-    ax4.set_ylabel("Distance Cumul (km)", fontsize=12, color='orange')
-    ax4.tick_params(axis='y', labelcolor='orange')
+    ax4.set_ylabel("Cumul (km)", fontsize=label_fontsize, color=cumul_color)
+    ax4.tick_params(axis='y', labelcolor=cumul_color)
 
     for _sl in [1500, 2500]:
         xmax = ax4.get_xlim()[1]  # limite droite de l'axe X
-        ax4.text(xmax, _sl + 0.2, f"{_sl} km", color="orange", fontsize=12,
+        ax4.text(xmax, _sl + 0.2, f"{_sl} km", color=cumul_color, fontsize=12,
                  horizontalalignment="right", verticalalignment="bottom")
-        ax4.axhline(_sl, color="orange", lw=0.8, alpha=1, linestyle='--')
+        ax4.axhline(_sl, color=cumul_color, lw=0.8, alpha=1, linestyle='--')
 
     # Set x ticks
     # date_format = '%d %b'
