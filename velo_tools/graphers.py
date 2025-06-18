@@ -54,19 +54,29 @@ def show_resume(my_df):
     ax0.set_ylabel("D+ (m)", color=elev_color, fontsize=label_fontsize, loc="top")
     ax0.tick_params(axis='y', labelcolor=elev_color, labelsize=label_fontsize - 5)
     ax0.yaxis.tick_right()
-    ax0.yaxis.set_label_position("right")
+    ax0.yaxis.set_label_position("left")
 
-    for _hl in [0, 400, 800, 1200]:
-        ax0.text(elev_df.index[0], _hl + 0.2, f"{_hl} m", color=elev_color, fontsize=12, horizontalalignment="right")
+    for _hl in [0, 500, 1000]:
+        # ax0.text(elev_df.index[0], _hl + 0.2, f"{_hl} m", color=elev_color, fontsize=12, horizontalalignment="right")
         ax0.axhline(_hl, color=elev_color, lw=0.8, alpha=1, linestyle='--')
 
-        # ax0.set_ylim([-4000, 1000])
+    # ax0.set_ylim([-4000, 1000])
     ax0.plot(elev_df.index, elev_df.interpolate(method="pchip", order=5), color=elev_color)
     ax0.scatter(elev_df.index, elev_df, marker="*", zorder=3, color="red", edgecolor="black", lw=0.5, s=120)
     # show start of weeks
     for monday in monday_idx:
         ax0.axvline(monday, color='black', lw=0.5, alpha=0.5, linestyle='-')
 
+    # Cumulative elev
+    cumul_color = 'darkgreen'
+    ax6 = ax0.twinx()  # instantiate a second axes that shares the same x-axis
+    cumulated_elev = elev_df.cumsum()
+    ax6.plot(cumulated_elev.index, cumulated_elev, color=cumul_color, linewidth=2.5, marker='o', zorder=4, label='Sum D+ (m)')
+    ax6.set_ylim([0, 30000])
+
+    # Title
+    ax6.set_ylabel("Sum D+ (m)", fontsize=label_fontsize, color=cumul_color)
+    ax6.tick_params(axis='y', labelcolor=cumul_color)
     # ax0.set_ylim([0, 1000])
 
     ax1 = ax[1]
@@ -106,7 +116,7 @@ def show_resume(my_df):
     for _hl in [20, 25]:
         xmax = ax2.get_xlim()[1]  # limite droite de l'axe X
         ax2.text(xmax, _hl + 0.2, f"{_hl} km", color=color, fontsize=12,
-             horizontalalignment="right", verticalalignment="bottom")
+                 horizontalalignment="right", verticalalignment="bottom")
         ax2.axhline(_hl, color=color, lw=0.8, alpha=1, linestyle='--')
 
     ax2.set_ylabel('V. moy. (km/h)', color=color, fontsize=label_fontsize,
@@ -144,7 +154,7 @@ def show_resume(my_df):
         ax3.axvline(monday, color='black', lw=0.5, alpha=0.5, linestyle='-')
     ax3.set_ylim([0, 180])
 
-    # Cumulative plot
+    # Cumulative distance
     cumul_color = '#ff4000'
     ax4 = ax3.twinx()  # instantiate a second axes that shares the same x-axis
     cumulated_kms = kmsum_df.cumsum()
