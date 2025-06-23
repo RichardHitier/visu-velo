@@ -1,9 +1,16 @@
+import os
 from os.path import basename, splitext
 
 import matplotlib.pyplot as plt
 
 from velo_tools.graphers import show_resume, plot_fit
 from velo_tools.readers import ods_to_df, summarize, fit_to_df
+
+
+def print_file(filename):
+    my_df = ods_to_df(filename)
+    from pprint import pprint
+    pprint(my_df)
 
 
 def plot_file(filename, _show_to_screen=False):
@@ -45,7 +52,13 @@ if __name__ == "__main__":
         fig = plot_fit(_fit_df)
         plt.show()
         print(f"Saved fot fit.png")
-
+    elif data_type == 'print':
+        if len(sys.argv) != 3:
+            my_help("Give filepath as arg")
+        file = sys.argv[2]
+        if not os.path.isfile(file):
+            my_help(f"{file} doesnt exist")
+        print_file(file)
     elif data_type == 'bike':
         display_mode = sys.argv[2]
         num_plots = sys.argv[3]
