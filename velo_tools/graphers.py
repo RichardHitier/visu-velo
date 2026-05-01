@@ -121,8 +121,9 @@ def show_resume(my_df):
 
     ax2.set_ylabel('V. moy. (km/h)', color=color, fontsize=label_fontsize,
                    loc="top")  # we already handled the x-label with ax1
-    ## Spline 3
-    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=3), color="red", lw=2, zorder=-4)
+    ## Spline 3 (fall back to lower order when data is sparse)
+    spline_order = min(3, len(moy_df.dropna()) - 1)
+    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=spline_order), color="red", lw=2, zorder=-4)
     ## Claude Cubic
     # ax2.plot(moy_df.index, moy_df.interpolate(method="cubic"), color="red", lw=2, zorder=-4)
     ## Claude PCHip
