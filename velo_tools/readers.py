@@ -41,8 +41,8 @@ def ods_to_df(file_path):
     my_df.dropna(inplace=True)
     my_df.index = pd.to_datetime(my_df.index)
 
-    # start_year =  my_df.index[0]
-    start_year = my_df.index[0].year
+    first = my_df.index[0]
+    start_year = first.year if first.month >= 11 else first.year - 1
     start_date = datetime.datetime(start_year, 11, 1)
     stop_date = datetime.datetime(start_year + 1, 10, 31)
 
@@ -62,12 +62,12 @@ def summarize(my_df):
     """
 
     # Insert two new columns: week and month (with year)
-    my_df["week"] = pd.to_datetime(my_df.index).strftime('%Y-%W')
+    my_df["week"] = pd.to_datetime(my_df.index).strftime('%G-%V')
     # my_df["month"] =  pd.to_datetime(my_df.index).strftime('%Y-%m')
 
     week_sum = my_df.groupby('week').agg({"km": "sum"})
 
-    week_sum.set_index(pd.to_datetime(week_sum.index + '1', format="%Y-%W%w"), inplace=True)
+    week_sum.set_index(pd.to_datetime(week_sum.index + '-1', format="%G-%V-%u"), inplace=True)
     week_sum['mondays'] = week_sum.index.strftime("%a %d/%m")
 
     my_df["date_as_str"] = my_df.index.strftime("%Y-%m-%d-%a")

@@ -73,5 +73,14 @@ if __name__ == "__main__":
         for f in odsfiles[:int(num_plots)]:
             plot_file(f, show_to_screen)
 
+    elif data_type == 'plot':
+        if len(sys.argv) < 3:
+            my_help("Usage: show_graphs.py plot <file.ods> [show]")
+        file = sys.argv[2]
+        if not os.path.isfile(file):
+            my_help(f"{file} doesn't exist")
+        show_to_screen = len(sys.argv) >= 4 and sys.argv[3] == 'show'
+        plot_file(file, show_to_screen)
+
     else:
-        print("First arg should be in [fit, bike]")
+        print("First arg should be in [fit, bike, plot, print]")

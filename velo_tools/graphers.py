@@ -115,14 +115,15 @@ def show_resume(my_df):
     color = 'tab:red'
     for _hl in [20, 25]:
         xmax = ax2.get_xlim()[1]  # limite droite de l'axe X
-        ax2.text(xmax, _hl + 0.2, f"{_hl} km", color=color, fontsize=12,
+        ax2.text(xmax, _hl + 0.2, f"{_hl} km/h", color=color, fontsize=12,
                  horizontalalignment="right", verticalalignment="bottom")
         ax2.axhline(_hl, color=color, lw=0.8, alpha=1, linestyle='--')
 
     ax2.set_ylabel('V. moy. (km/h)', color=color, fontsize=label_fontsize,
                    loc="top")  # we already handled the x-label with ax1
-    ## Spline 3
-    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=3), color="red", lw=2, zorder=-4)
+    ## Spline 3 (fall back to lower order when data is sparse)
+    spline_order = min(3, len(moy_df.dropna()) - 1)
+    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=spline_order), color="red", lw=2, zorder=-4)
     ## Claude Cubic
     # ax2.plot(moy_df.index, moy_df.interpolate(method="cubic"), color="red", lw=2, zorder=-4)
     ## Claude PCHip
