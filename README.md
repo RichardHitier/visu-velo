@@ -12,3 +12,4 @@ will produce 2 files:
  * ProgrammeCyclo_23-24.png
  * ProgrammeCyclo_24-25.png
 
+python show_graphs.py plot ./ProgrammeCyclo_25-26.ods
