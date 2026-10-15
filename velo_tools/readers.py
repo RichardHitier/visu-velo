@@ -32,8 +32,7 @@ def fit_to_df(_fit_path):
 
 
 def ods_to_df(file_path):
-    my_df = pd.read_excel(file_path, sheet_name="Journal", header=4, index_col=3,
-                          parse_dates=True)
+    my_df = pd.read_excel(file_path, sheet_name="Journal", header=4, index_col=3)
     pd.set_option('expand_frame_repr', False)
     pd.set_option('display.max_rows', None)
 
