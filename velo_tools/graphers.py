@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -35,6 +36,7 @@ def show_resume(my_df):
                    "hiit": "#f10d0c",
                    "spec": "#afd095",
                    "deniv": "#ff972f",
+                   "tempo": "#cc7a25",
                    "puissance": "#cc7a25",
                    "force": "#b80a09",
                    "course": "#009900"}
@@ -52,19 +54,29 @@ def show_resume(my_df):
     ax0.set_ylabel("D+ (m)", color=elev_color, fontsize=label_fontsize, loc="top")
     ax0.tick_params(axis='y', labelcolor=elev_color, labelsize=label_fontsize - 5)
     ax0.yaxis.tick_right()
-    ax0.yaxis.set_label_position("right")
+    ax0.yaxis.set_label_position("left")
 
-    for _hl in [0, 400, 800, 1200]:
-        ax0.text(elev_df.index[0], _hl + 0.2, f"{_hl} m", color=elev_color, fontsize=12, horizontalalignment="right")
+    for _hl in [0, 500, 1000]:
+        # ax0.text(elev_df.index[0], _hl + 0.2, f"{_hl} m", color=elev_color, fontsize=12, horizontalalignment="right")
         ax0.axhline(_hl, color=elev_color, lw=0.8, alpha=1, linestyle='--')
 
-        # ax0.set_ylim([-4000, 1000])
+    # ax0.set_ylim([-4000, 1000])
     ax0.plot(elev_df.index, elev_df.interpolate(method="pchip", order=5), color=elev_color)
     ax0.scatter(elev_df.index, elev_df, marker="*", zorder=3, color="red", edgecolor="black", lw=0.5, s=120)
     # show start of weeks
     for monday in monday_idx:
         ax0.axvline(monday, color='black', lw=0.5, alpha=0.5, linestyle='-')
 
+    # Cumulative elev
+    cumul_color = 'darkgreen'
+    ax6 = ax0.twinx()  # instantiate a second axes that shares the same x-axis
+    cumulated_elev = elev_df.cumsum()
+    ax6.plot(cumulated_elev.index, cumulated_elev, color=cumul_color, linewidth=2.5, marker='o', zorder=4, label='Sum D+ (m)')
+    ax6.set_ylim([0, 30000])
+
+    # Title
+    ax6.set_ylabel("Sum D+ (m)", fontsize=label_fontsize, color=cumul_color)
+    ax6.tick_params(axis='y', labelcolor=cumul_color)
     # ax0.set_ylim([0, 1000])
 
     ax1 = ax[1]
@@ -86,6 +98,9 @@ def show_resume(my_df):
 
     # 3- draw km bars
     ax1.bar(km_df.index, km_df, color=colors, width=0.9, edgecolor="black", linewidth=0.5)
+    for _dl in [50]:
+        ax1.text(km_df.index[0], _dl + 0.2, f"{_dl} km", color="black", fontsize=12, horizontalalignment="right")
+        ax1.axhline(_dl, color="black", lw=0.8, alpha=1, linestyle='-.')
 
     ax1.set_ylabel("Distance (km)", color=bar_color, fontsize=label_fontsize, loc="bottom")
     ax1.tick_params(axis='y', labelcolor=bar_color, labelsize=label_fontsize - 5)
@@ -99,13 +114,16 @@ def show_resume(my_df):
     ax2.set_ylim([5, 30])
     color = 'tab:red'
     for _hl in [20, 25]:
-        ax2.text(moy_df.index[0], _hl + 0.2, f"{_hl} km/h", color=color, fontsize=12, horizontalalignment="right")
+        xmax = ax2.get_xlim()[1]  # limite droite de l'axe X
+        ax2.text(xmax, _hl + 0.2, f"{_hl} km/h", color=color, fontsize=12,
+                 horizontalalignment="right", verticalalignment="bottom")
         ax2.axhline(_hl, color=color, lw=0.8, alpha=1, linestyle='--')
 
     ax2.set_ylabel('V. moy. (km/h)', color=color, fontsize=label_fontsize,
                    loc="top")  # we already handled the x-label with ax1
-    ## Spline 3
-    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=3), color="red", lw=2, zorder=-4)
+    ## Spline 3 (fall back to lower order when data is sparse)
+    spline_order = min(3, len(moy_df.dropna()) - 1)
+    ax2.plot(moy_df.index, moy_df.interpolate(method="spline", order=spline_order), color="red", lw=2, zorder=-4)
     ## Claude Cubic
     # ax2.plot(moy_df.index, moy_df.interpolate(method="cubic"), color="red", lw=2, zorder=-4)
     ## Claude PCHip
@@ -123,7 +141,10 @@ def show_resume(my_df):
     ax3.set_title("Somme distance / semaine (km)", y=1.0, pad=16)
     ax3.title.set_size(15)
 
-    bar_container = ax3.bar(kmsum_df.index, kmsum_df, color='#1455C5', align='edge', width=2, zorder=2,
+    w_km_color = '#1455C5'
+    kmsum_df.replace(0, np.nan, inplace=True)
+    kmsum_df.dropna(inplace=True)
+    bar_container = ax3.bar(kmsum_df.index, kmsum_df, color=w_km_color, align='edge', width=2, zorder=2,
                             edgecolor="black")
 
     kmsum_labels = [f"{int(v)}" if pd.notna(v) else "" for v in kmsum_df]
@@ -132,8 +153,24 @@ def show_resume(my_df):
     # show start of weeks
     for monday in monday_idx:
         ax3.axvline(monday, color='black', lw=0.5, alpha=0.5, linestyle='-')
-
     ax3.set_ylim([0, 180])
+
+    # Cumulative distance
+    cumul_color = '#ff4000'
+    ax4 = ax3.twinx()  # instantiate a second axes that shares the same x-axis
+    cumulated_kms = kmsum_df.cumsum()
+    ax4.plot(kmsum_df.index, cumulated_kms, color=cumul_color, linewidth=2.5, marker='o', zorder=4, label='Cumul (km)')
+    ax4.set_ylim([0, 3000])
+
+    # Title
+    ax4.set_ylabel("Cumul (km)", fontsize=label_fontsize, color=cumul_color)
+    ax4.tick_params(axis='y', labelcolor=cumul_color)
+
+    for _sl in [1500, 2500]:
+        xmax = ax4.get_xlim()[1]  # limite droite de l'axe X
+        ax4.text(xmax, _sl + 0.2, f"{_sl} km", color=cumul_color, fontsize=12,
+                 horizontalalignment="right", verticalalignment="bottom")
+        ax4.axhline(_sl, color=cumul_color, lw=0.8, alpha=1, linestyle='--')
 
     # Set x ticks
     # date_format = '%d %b'
@@ -144,7 +181,7 @@ def show_resume(my_df):
     # ax3.xaxis.set_minor_formatter(mdates.DateFormatter(date_format))
     # ax3.set_xticks(monday_idx)
     # ax3.set_xticklabels (ax3.get_xticklabels(), ha="right")
-    ax3.set_ylabel("Distance (km)", color=bar_color, fontsize=label_fontsize, loc="bottom")
+    ax3.set_ylabel("Distance (km)", color=w_km_color, fontsize=label_fontsize, loc="bottom")
     months = mdates.MonthLocator(interval=1, bymonthday=15)
     months_fmt = mdates.DateFormatter('%b')
     ax3.xaxis.set_major_locator(months)
