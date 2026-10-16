@@ -1,0 +1,2 @@
+name,id,distance_km,dplus_m,start,finish,date,gpx_path,status,http_status,message
+st sernin,18107319,26.7,368,Limoux,Limoux,11.10 2024,data/openrunner/18107319.gpx,downloaded,200,

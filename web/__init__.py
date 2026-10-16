@@ -1,17 +1,39 @@
 import datetime
 import io
 import base64
+from functools import lru_cache
+from pathlib import Path
+
 import pandas as pd
 import matplotlib.pyplot as plt
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from bokeh.embed import components
 from bokeh.plotting import figure, curdoc
 from bokeh.resources import INLINE
 from bokeh.models import HoverTool, ColumnDataSource
 
+from velo_tools.openrunner import load_routes
+
+OPENRUNNER_DIR = Path(__file__).resolve().parent.parent / "data" / "openrunner"
+
+
+@lru_cache
+def cached_routes(data_dir):
+    """Route summaries of data_dir, read once per process."""
+    return load_routes(data_dir)
+
 
 def create_app():
     app = Flask(__name__)
+    app.config.setdefault("OPENRUNNER_DIR", OPENRUNNER_DIR)
+
+    @app.route("/parcours")
+    def parcours():
+        return render_template("parcours.html")
+
+    @app.route("/api/routes")
+    def api_routes():
+        return jsonify(cached_routes(str(app.config["OPENRUNNER_DIR"])))
 
     @app.route("/")
     def home():

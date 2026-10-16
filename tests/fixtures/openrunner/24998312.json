@@ -1,0 +1,14 @@
+{
+  "data": {
+    "id": 24998312,
+    "name": "Autour de Soum d'Casteigts",
+    "activity": {"id": 3, "name": "HIKING", "i18n": "Hiking"},
+    "length": 2700,
+    "loop_type": "from-a-to-b",
+    "start_location": null,
+    "created_at": "2026-08-22T09:00:00.000000Z",
+    "elevation": null,
+    "shape": {"full_encoded": "_p~iF~ps|U_ulLnnqC"},
+    "passes": []
+  }
+}

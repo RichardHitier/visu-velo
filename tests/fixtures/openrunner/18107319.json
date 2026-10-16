@@ -1,0 +1,22 @@
+{
+  "data": {
+    "id": 18107319,
+    "name": "st sernin",
+    "activity": {"id": 1, "name": "CYCLING", "i18n": "Road Cycling"},
+    "length": 26681,
+    "loop_type": "loop",
+    "start_location": {"name": "Limoux"},
+    "created_at": "2023-12-25T16:05:13.000000Z",
+    "elevation": {"ascent": 368, "descent": 364, "min": 169, "max": 470},
+    "shape": {"full_encoded": "_p~iF~ps|U_ulLnnqC_mqNvxq`@"},
+    "passes": [
+      {
+        "id": "FR-11-0470b",
+        "name": "Col du Villa",
+        "difficulty": 0,
+        "altitude_in_meter": 470,
+        "location_in_meter": 14792
+      }
+    ]
+  }
+}
