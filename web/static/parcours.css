@@ -23,8 +23,129 @@ header h1 {
     font-size: 1.2rem;
 }
 
+main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+aside {
+    width: 26rem;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #ccc;
+    font-size: 0.85rem;
+    min-height: 0;
+}
+
 #map {
     flex: 1;
+}
+
+#filters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem 0.6rem;
+    padding: 0.6rem;
+    border-bottom: 1px solid #ccc;
+    background: #f6f6f6;
+}
+
+#filters label,
+#filters fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+#filters fieldset {
+    grid-column: span 3;
+    flex-direction: row;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#filters fieldset legend {
+    float: left;
+    width: 7rem;
+    padding: 0;
+}
+
+#filters fieldset input {
+    width: 5rem;
+}
+
+#filters label.inline {
+    grid-column: span 2;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.table-wrap {
+    flex: 1;
+    overflow-y: auto;
+}
+
+#routes {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#routes thead th {
+    position: sticky;
+    top: 0;
+    background: #e8e8e8;
+    cursor: pointer;
+    user-select: none;
+    text-align: left;
+    padding: 0.3rem 0.4rem;
+    white-space: nowrap;
+}
+
+#routes th.sorted-asc::after {
+    content: " ▲";
+}
+
+#routes th.sorted-desc::after {
+    content: " ▼";
+}
+
+#routes td {
+    padding: 0.25rem 0.4rem;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+#routes td:first-child {
+    width: 100%;
+}
+
+#routes td:first-child i {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+}
+
+#routes .num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+#routes td:nth-child(2) {
+    white-space: nowrap;
+}
+
+#routes tbody tr:hover {
+    background: #fff4d6;
+}
+
+#routes tbody tr.selected {
+    background: #ffe39a;
 }
 
 .legend {
@@ -51,4 +172,17 @@ header h1 {
 .route-popup ul {
     margin: 0.3rem 0 0;
     padding-left: 1.1rem;
+}
+
+@media (max-width: 700px) {
+    main {
+        flex-direction: column-reverse;
+    }
+
+    aside {
+        width: auto;
+        height: 45%;
+        border-right: 0;
+        border-top: 1px solid #ccc;
+    }
 }

@@ -12,7 +12,54 @@
         <h1>Parcours OpenRunner</h1>
         <span id="count"></span>
     </header>
-    <div id="map"></div>
+    <main>
+        <aside>
+            <form id="filters">
+                <label>Activité
+                    <select name="activity"><option value="">Toutes</option></select>
+                </label>
+                <label>Année
+                    <select name="year"><option value="">Toutes</option></select>
+                </label>
+                <label>Type
+                    <select name="loop_type">
+                        <option value="">Tous</option>
+                        <option value="loop">Boucle</option>
+                        <option value="from-a-to-b">A → B</option>
+                        <option value="return-trip">Aller-retour</option>
+                    </select>
+                </label>
+                <fieldset>
+                    <legend>Distance (km)</legend>
+                    <input type="number" name="km_min" min="0" placeholder="min">
+                    <input type="number" name="km_max" min="0" placeholder="max">
+                </fieldset>
+                <fieldset>
+                    <legend>D+ (m)</legend>
+                    <input type="number" name="dplus_min" min="0" step="50" placeholder="min">
+                    <input type="number" name="dplus_max" min="0" step="50" placeholder="max">
+                </fieldset>
+                <label class="inline">
+                    <input type="checkbox" name="in_view"> Zone visible seulement
+                </label>
+                <button type="reset">Réinitialiser</button>
+            </form>
+            <div class="table-wrap">
+                <table id="routes">
+                    <thead>
+                        <tr>
+                            <th data-sort="name">Nom</th>
+                            <th data-sort="date">Date</th>
+                            <th data-sort="distance_km" class="num">km</th>
+                            <th data-sort="dplus" class="num">D+</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </aside>
+        <div id="map"></div>
+    </main>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="{{ url_for('static', filename='parcours.js') }}"></script>
 </body>
