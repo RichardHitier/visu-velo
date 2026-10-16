@@ -1,15 +1,25 @@
-// Map of all OpenRunner routes, one polyline per route colored by activity.
+// Map of all OpenRunner routes, one polyline per route with its own color.
 
-const ACTIVITY_COLORS = {
-    CYCLING: "#d7301f",
-    CYCLING_MTB: "#8c510a",
-    HIKING: "#1a9850",
-    BACKCOUNTRY_SKIING: "#2166ac",
-    SKI_TOURING: "#5e3c99",
-};
-const DEFAULT_COLOR = "#636363";
-const BASE_STYLE = { weight: 3, opacity: 0.7 };
+const BASE_STYLE = { weight: 3, opacity: 0.8 };
 const HIGHLIGHT_STYLE = { weight: 6, opacity: 1 };
+const HIDDEN_STYLE = { opacity: 0 };
+const ROAD_ACTIVITY = "CYCLING";
+const DASH = "6 6";
+
+// Stable, well spread color per route: golden-angle hue stepping on the id.
+function routeColor(route) {
+    const hue = (route.id * 137.508) % 360;
+    return `hsl(${hue.toFixed(0)}, 75%, 42%)`;
+}
+
+// Road rides are solid lines, every other activity is dashed.
+function baseStyle(route) {
+    return {
+        ...BASE_STYLE,
+        color: routeColor(route),
+        dashArray: route.activity === ROAD_ACTIVITY ? null : DASH,
+    };
+}
 const VIEW_KEY = "parcours.mapView";
 
 // Last saved {lat, lng, zoom}, or null when absent or storage unavailable.
@@ -81,18 +91,13 @@ function popupHtml(route) {
 }
 
 function addLegend(map, routes) {
-    const counts = {};
-    for (const route of routes) counts[route.activity] = (counts[route.activity] || 0) + 1;
+    const road = routes.filter((r) => r.activity === ROAD_ACTIVITY).length;
     const legend = L.control({ position: "bottomright" });
     legend.onAdd = () => {
         const div = L.DomUtil.create("div", "legend");
-        div.innerHTML = Object.entries(counts)
-            .sort((a, b) => b[1] - a[1])
-            .map(([activity, n]) => {
-                const color = ACTIVITY_COLORS[activity] || DEFAULT_COLOR;
-                return `<i style="background:${color}"></i>${activity} (${n})`;
-            })
-            .join("<br>");
+        div.innerHTML =
+            `<i class="solid"></i>Vélo route (${road})<br>` +
+            `<i class="dashed"></i>Autres activités (${routes.length - road})`;
         return div;
     };
     legend.addTo(map);
@@ -150,9 +155,8 @@ function compareRoutes(key, dir) {
 }
 
 function rowHtml(route) {
-    const color = ACTIVITY_COLORS[route.activity] || DEFAULT_COLOR;
-    return `<tr data-id="${route.id}">
-        <td><i style="background:${color}"></i>${escapeHtml(route.name)}</td>
+    return `<tr data-id="${route.id}" title="${escapeHtml(route.activity)}">
+        <td><i style="background:${routeColor(route)}"></i>${escapeHtml(route.name)}</td>
         <td>${route.date}</td>
         <td class="num">${route.distance_km}</td>
         <td class="num">${route.dplus ?? ""}</td>
@@ -189,12 +193,11 @@ async function main() {
 
     const group = L.featureGroup().addTo(map);
     for (const route of routes) {
-        const color = ACTIVITY_COLORS[route.activity] || DEFAULT_COLOR;
-        const line = L.polyline(decodePolyline(route.polyline), { color, ...BASE_STYLE });
+        const line = L.polyline(decodePolyline(route.polyline), baseStyle(route));
         line.bindPopup(popupHtml(route));
         line.bindTooltip(`${route.name} · ${route.distance_km} km`, { sticky: true });
         line.on("mouseover", () => line.setStyle(HIGHLIGHT_STYLE).bringToFront());
-        line.on("mouseout", () => line.setStyle(BASE_STYLE));
+        line.on("mouseout", () => line.setStyle(baseStyle(route)));
         line.on("click", () => selectRow(route));
         route.layer = line;
         line.addTo(group);
@@ -247,12 +250,26 @@ async function main() {
         return row ? byId.get(row.dataset.id) : null;
     }
 
+    // Hovering a row shows that route alone on the map; leaving the list restores all.
+    let soloId = null;
+
+    function showSolo(route) {
+        if (route && String(route.id) === soloId) return;
+        soloId = route ? String(route.id) : null;
+        group.eachLayer((layer) => {
+            const own = byLayer.get(layer);
+            if (!route) layer.setStyle(baseStyle(own));
+            else if (own === route) layer.setStyle(HIGHLIGHT_STYLE).bringToFront();
+            else layer.setStyle(HIDDEN_STYLE);
+        });
+    }
+
+    const byLayer = new Map(routes.map((r) => [r.layer, r]));
     tbody.addEventListener("mouseover", (event) => {
-        routeOfEvent(event)?.layer.setStyle(HIGHLIGHT_STYLE).bringToFront();
+        const route = routeOfEvent(event);
+        if (route) showSolo(route);
     });
-    tbody.addEventListener("mouseout", (event) => {
-        routeOfEvent(event)?.layer.setStyle(BASE_STYLE);
-    });
+    tbody.addEventListener("mouseleave", () => showSolo(null));
     tbody.addEventListener("click", (event) => {
         const route = routeOfEvent(event);
         if (!route) return;

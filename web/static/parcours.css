@@ -158,10 +158,14 @@ aside {
 
 .legend i {
     display: inline-block;
-    width: 1.2rem;
-    height: 0.25rem;
+    width: 1.6rem;
     margin-right: 0.4rem;
     vertical-align: middle;
+    border-top: 3px solid #555;
+}
+
+.legend i.dashed {
+    border-top-style: dashed;
 }
 
 .route-popup h3 {
