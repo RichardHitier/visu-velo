@@ -9,7 +9,12 @@ from odf.opendocument import load
 
 from download_intervals import season_bounds
 from velo_tools import intervals
-from velo_tools.intervals import activity_to_row, clean_name, rides_to_rows
+from velo_tools.intervals import (
+    activity_to_row,
+    clean_name,
+    dominant_zone,
+    rides_to_rows,
+)
 from velo_tools.journal import (
     _cell_at,
     _journal_table,
@@ -31,6 +36,7 @@ MALVIES = {
     "total_elevation_gain": 56.0,
     "average_speed": 6.591,
     "average_heartrate": 134,
+    "icu_hr_zone_times": [559, 1108, 647, 95, 0, 0, 0],
 }
 
 
@@ -55,6 +61,7 @@ def test_activity_to_row_rounds_like_manual_entries():
         "km": 16,
         "temps": timedelta(minutes=40),
         "elev": 56,
+        "zone": 2,
         "moy": 23.7,
         "fc": 134,
     }
@@ -66,6 +73,20 @@ def test_activity_to_row_keeps_missing_hr_and_speed_empty():
     )
     assert row["fc"] is None
     assert row["moy"] is None
+
+
+@pytest.mark.parametrize(
+    "times, expected",
+    [
+        ([136, 1225, 2305, 1023, 38, 0, 0], 3),
+        ([559, 1108, 647, 95, 0, 0, 0], 2),
+        ([0, 0, 0, 0, 0, 10, 600], 5),  # capped at Z5
+        ([0, 0, 0, 0, 0, 0, 0], None),
+        (None, None),
+    ],
+)
+def test_dominant_zone(times, expected):
+    assert dominant_zone({"icu_hr_zone_times": times}) == expected
 
 
 def test_rides_to_rows_keeps_rides_sorted_oldest_first():
@@ -149,7 +170,8 @@ def test_append_rides_fills_first_empty_row(journal):
         134,
     )
     assert str(row["temps"]) == "00:40:00"
-    assert pd.isna(row["type"]) and pd.isna(row["zone"])
+    assert pd.isna(row["type"])
+    assert float(row["zone"]) == 2  # pandas turns the text "2" into 2.0
     # Existing rides untouched
     assert df[df["n."] == 1].iloc[0]["destination"] == "St Polycarpe"
 

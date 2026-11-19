@@ -6,6 +6,7 @@ filling a ride means writing values into the cells of the first row whose
 result, the other ones (totals) lose theirs so LibreOffice recomputes them.
 """
 
+import re
 from datetime import date, timedelta
 
 from odf.element import Element
@@ -23,9 +24,13 @@ COLUMNS = {
     "km": 6,
     "temps": 7,
     "elev": 8,
+    "zone": 9,
     "moy": 10,
     "fc": 11,
 }
+TYPE_COL = 5
+DURATION = re.compile(r"PT(\d+)H(\d+)M(\d+(?:\.\d+)?)S")
+DIGIT = re.compile(r"\d")
 CALCEXTNS = (
     "urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0"
 )
@@ -38,11 +43,15 @@ VALUE_ATTRS = (
 )
 
 
-def _journal_table(doc):
+def _table(doc, name):
     for table in doc.spreadsheet.getElementsByType(Table):
-        if table.getAttribute("name") == SHEET:
+        if table.getAttribute("name") == name:
             return table
-    raise ValueError(f"No '{SHEET}' sheet in document")
+    raise ValueError(f"No '{name}' sheet in document")
+
+
+def _journal_table(doc):
+    return _table(doc, SHEET)
 
 
 def _repeat(element, attr):
@@ -100,6 +109,27 @@ def _cell_date(cell):
     return date.fromisoformat(value[:10]) if value else None
 
 
+def _cell_number(cell):
+    value = cell.getAttrNS(OFFICENS, "value")
+    return float(value) if value else None
+
+
+def _cell_duration(cell):
+    match = DURATION.match(cell.getAttrNS(OFFICENS, "time-value") or "")
+    if not match:
+        return timedelta(0)
+    hours, minutes, seconds = match.groups()
+    return timedelta(
+        hours=int(hours), minutes=int(minutes), seconds=float(seconds)
+    )
+
+
+def _cell_zone(cell):
+    """Zone typed as text ('3', 'Z3') or number; None when empty."""
+    match = DIGIT.search(str(cell))
+    return int(match.group()) if match else None
+
+
 def _clear_value(cell):
     for child in list(cell.childNodes):
         cell.removeChild(child)
@@ -145,6 +175,27 @@ def journal_dates(path):
     return {d for d in dates if d}
 
 
+def read_rides(doc):
+    """Return the Journal rides of a loaded doc, as dicts with
+    date, type (lowercase, '' when empty), km, temps and zone (or None).
+    """
+    rides = []
+    for row in _ride_rows(_journal_table(doc)):
+        day = _cell_date(_cell_at(row, COLUMNS["date"]))
+        if not day:
+            continue
+        rides.append(
+            {
+                "date": day,
+                "type": str(_cell_at(row, TYPE_COL)).strip().lower(),
+                "km": _cell_number(_cell_at(row, COLUMNS["km"])) or 0,
+                "temps": _cell_duration(_cell_at(row, COLUMNS["temps"])),
+                "zone": _cell_zone(_cell_at(row, COLUMNS["zone"])),
+            }
+        )
+    return rides
+
+
 def append_rides(path, rides, output=None):
     """Write rides (dicts from intervals.activity_to_row) into the first
     empty Journal rows of path; save to output (default: path).
@@ -168,24 +219,28 @@ def append_rides(path, rides, output=None):
             if key == "num":
                 continue
             value = ride["date"] if key == "w" else ride.get(key)
+            if key == "zone" and value is not None:
+                value = str(value)  # typed as text by hand in the Journal
             _set_value(_cell_at(row, col), value)
         num = _cell_at(row, COLUMNS["num"]).getAttrNS(OFFICENS, "value")
         filled.append(int(float(num)))
-    _drop_cached_results(table)
+    _drop_cached_results(table, keep=lambda cell, col: col == COLUMNS["w"])
     doc.save(str(output or path))
     return filled
 
 
-def _drop_cached_results(table):
-    """Clear the cached result of the table's formulas, except column 'w'.
+def _drop_cached_results(table, keep):
+    """Clear the cached result of the table's formulas, except where
+    keep(cell, col) is true.
 
     LibreOffice does not recalculate a file it did not save itself, so stale
     totals would stay; a formula without a cached result is computed on load.
-    'w' results are written by append_rides and stay readable by pandas.
+    In the Journal, 'w' results are written by append_rides and stay
+    readable by pandas.
     """
     for row in table.getElementsByType(TableRow):
         col = 0
         for cell in row.childNodes:
-            if cell.getAttrNS(TABLENS, "formula") and col != COLUMNS["w"]:
+            if cell.getAttrNS(TABLENS, "formula") and not keep(cell, col):
                 _clear_value(cell)
             col += _repeat(cell, "number-columns-repeated")
