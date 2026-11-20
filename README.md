@@ -28,7 +28,19 @@ La saison vient du nom du fichier (26-27, donc du 01/11/2026 au 31/10/2027). Seu
 
 ## 3. Carte des parcours
 
-    python download_openrunner.py   # met à jour data/openrunner/ (GPX + JSON)
-    gunicorn visu_velo_web:app      # puis http://127.0.0.1:8000/parcours
+    python download_openrunner.py --activity   # JSON manquants → data/openrunner/<id>.json
+    python download_openrunner.py              # GPX manquants  → data/openrunner/<id>.gpx
+    gunicorn visu_velo_web:app                 # puis http://127.0.0.1:8000/parcours
+
+La carte lit uniquement les JSON : tracé, km, D+ et cols. Les GPX ne servent que de sauvegarde. Les fichiers déjà présents ne sont pas retéléchargés.
+
+### Un parcours a changé sur OpenRunner
+
+    python download_openrunner.py --activity --force
+
+1. `--force` retélécharge tous les JSON (environ 1 min pour 144 parcours ; pas d'option pour un seul).
+2. Relancer gunicorn : les parcours sont gardés en cache.
+
+Pour un nouveau parcours, l'ajouter d'abord à `openrunner_routes.json` : le script lit cette liste mais ne la crée pas.
 
 Le serveur propose aussi `/matplotlib` (le PNG de la saison) et `/velo` (le graphique Bokeh).
