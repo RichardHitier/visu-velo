@@ -17,6 +17,8 @@ On en choisit un, puis il est codé jusqu'au bout.
 - [ ] Bouton « recentrer » qui efface la vue mémorisée.
 - [ ] Recherche par nom / lieu de départ.
 - [ ] Mémoriser filtres et tri dans `localStorage`.
+- [ ] [2026-11-20] Bouton « vue 3D » sur `/parcours` : garder Leaflet, vue 3D avec MapLibre GL + tuiles AWS Terrain Tiles.
+- [ ] [2026-11-20] `download_openrunner.py` : mettre à jour un seul tracé à partir de son id.
 
 ### 3. Ménage du dépôt
 - [ ] Ajouter `requests` à `requirements.txt` (utilisé par `download_openrunner.py`).
