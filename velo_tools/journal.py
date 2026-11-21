@@ -12,7 +12,11 @@ from datetime import date, timedelta
 from odf.element import Element
 from odf.namespaces import OFFICENS, TABLENS
 from odf.opendocument import load
-from odf.table import Table, TableRow
+from odf.number import DateStyle, Day, Hours, Minutes, Month, TimeStyle
+from odf.number import Text as NumberText
+from odf.number import Year
+from odf.style import Style, TextProperties
+from odf.table import Table, TableCell, TableRow
 from odf.text import P
 
 SHEET = "Journal"
@@ -31,6 +35,25 @@ COLUMNS = {
 TYPE_COL = 5
 DURATION = re.compile(r"PT(\d+)H(\d+)M(\d+(?:\.\d+)?)S")
 DIGIT = re.compile(r"\d")
+HORAIRE = re.compile(r"^\s*(\d+)\s*h\s*(\d*)\s*$")
+HISTORIQUE = "Historique"
+JOURNAL_HEADER = (
+    "Bloc",
+    "n.",
+    "w",
+    "date",
+    "destination",
+    "type",
+    "km",
+    "temps",
+    "elev",
+    "zone",
+    "moy",
+    "fc",
+    "Comment",
+)
+COMMENT_COL = 12
+HEADER_STYLE, DATE_STYLE, TIME_STYLE = "JrnHeader", "JrnDate", "JrnTime"
 CALCEXTNS = (
     "urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0"
 )
@@ -244,3 +267,150 @@ def _drop_cached_results(table, keep):
             if cell.getAttrNS(TABLENS, "formula") and not keep(cell, col):
                 _clear_value(cell)
             col += _repeat(cell, "number-columns-repeated")
+
+
+def parse_horaire(text):
+    """Duration typed as '1h30', '1h' or '0h59' in old Historique sheets."""
+    match = HORAIRE.match(text or "")
+    if not match:
+        raise ValueError(f"Unreadable duration {text!r}")
+    hours, minutes = match.groups()
+    return timedelta(hours=int(hours), minutes=int(minutes or 0))
+
+
+def _cell_float(cell):
+    """Number of a cell, also when typed as text ('4', '21,4')."""
+    value = _cell_number(cell)
+    if value is None:
+        try:
+            value = float(str(cell).replace(",", "."))
+        except ValueError:
+            return None
+    return int(value) if value.is_integer() else value
+
+
+def _row_texts(row):
+    texts = []
+    for cell in row.childNodes:
+        texts += [str(cell).strip()] * _repeat(cell, "number-columns-repeated")
+    return texts
+
+
+def read_historique(doc):
+    """Return the bike rides of an old 'Historique' sheet (22-23 season) as
+    Journal row dicts (like intervals.activity_to_row, plus comment),
+    oldest first. Other activities (rando...) are skipped.
+    """
+    rows = [
+        row
+        for row in _table(doc, HISTORIQUE).getElementsByType(TableRow)
+        if _repeat(row, "number-rows-repeated") == 1
+    ]
+    header = _row_texts(rows[0])
+    rides = []
+    for row in rows[1:]:
+
+        def cell(name):
+            return _cell_at(row, header.index(name))
+
+        day = _cell_date(cell("date"))
+        if not day or str(cell("type")).strip().lower() != "vélo":
+            continue
+        notes = [
+            (label, _cell_float(cell(name)))
+            for label, name in (
+                ("RPE", "RPE Borg"),
+                ("FC max", "FC Max"),
+                ("V max", "V Max"),
+            )
+        ]
+        rides.append(
+            {
+                "date": day,
+                "destination": str(cell("destination")).strip(),
+                "km": _cell_float(cell("km")),
+                "temps": parse_horaire(str(cell("horaire"))),
+                "elev": _cell_float(cell("Deniv")),
+                "zone": None,
+                "moy": _cell_float(cell("V Moy")),
+                "fc": _cell_float(cell("FC Moy")),
+                "comment": ", ".join(
+                    f"{label} {value}"
+                    for label, value in notes
+                    if value is not None
+                )
+                or None,
+            }
+        )
+    return sorted(rides, key=lambda ride: ride["date"])
+
+
+def _add_journal_styles(doc):
+    """Bold header, dd/mm/yyyy dates and hh:mm durations."""
+    date_format = DateStyle(name="JrnDateFmt")
+    for part in (
+        Day(style="long"),
+        NumberText(text="/"),
+        Month(style="long"),
+        NumberText(text="/"),
+        Year(style="long"),
+    ):
+        date_format.addElement(part)
+    time_format = TimeStyle(name="JrnTimeFmt", truncateonoverflow="false")
+    for part in (Hours(style="long"), NumberText(text=":"), Minutes()):
+        time_format.addElement(part)
+    header = Style(name=HEADER_STYLE, family="table-cell")
+    header.addElement(TextProperties(fontweight="bold"))
+    for element in (
+        date_format,
+        time_format,
+        header,
+        Style(
+            name=DATE_STYLE, family="table-cell", datastylename="JrnDateFmt"
+        ),
+        Style(
+            name=TIME_STYLE, family="table-cell", datastylename="JrnTimeFmt"
+        ),
+    ):
+        doc.automaticstyles.addElement(element)
+
+
+def add_journal_sheet(doc, rides):
+    """Append a Journal sheet holding rides (dicts from read_historique):
+    4 empty rows, the header on row 5, then one numbered row per ride,
+    as read by read_rides and readers.ods_to_df.
+    """
+    tables = doc.spreadsheet.getElementsByType(Table)
+    if any(table.getAttribute("name") == SHEET for table in tables):
+        raise ValueError(f"Document already has a '{SHEET}' sheet")
+    _add_journal_styles(doc)
+    table = Table(name=SHEET)
+    for _ in range(4):
+        row = TableRow()
+        row.addElement(TableCell())
+        table.addElement(row)
+    header = TableRow()
+    for name in JOURNAL_HEADER:
+        cell = TableCell(stylename=HEADER_STYLE)
+        _set_value(cell, name)
+        header.addElement(cell)
+    table.addElement(header)
+    for num, ride in enumerate(rides, start=1):
+        values = [None] * len(JOURNAL_HEADER)
+        for key, col in COLUMNS.items():
+            values[col] = ride.get(key)
+        values[COLUMNS["num"]] = num
+        values[COLUMNS["w"]] = ride["date"]
+        values[COMMENT_COL] = ride.get("comment")
+        row = TableRow()
+        for value in values:
+            if isinstance(value, date):
+                cell = TableCell(stylename=DATE_STYLE)
+            elif isinstance(value, timedelta):
+                cell = TableCell(stylename=TIME_STYLE)
+            else:
+                cell = TableCell()
+            _set_value(cell, value)
+            row.addElement(cell)
+        table.addElement(row)
+    doc.spreadsheet.addElement(table)

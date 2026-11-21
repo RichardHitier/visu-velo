@@ -27,6 +27,13 @@ Le PNG est écrit dans le dossier courant. Il contient trois graphiques : le D+,
 
 La saison vient du nom du fichier (26-27, donc du 01/11/2026 au 31/10/2027). Seules les dates absentes du Journal sont ajoutées. `type`, `zone` et le commentaire restent à remplir à la main.
 
+### Ancienne saison sans Journal (22-23)
+
+    python historique_to_journal.py /home/richard/03COMMON/0000velo/ProgrammeCyclo_22-23.ods --dry-run
+    python historique_to_journal.py /home/richard/03COMMON/0000velo/ProgrammeCyclo_22-23.ods
+
+Ajoute une feuille Journal remplie depuis la feuille Historique (sorties vélo seulement ; `type` et `zone` vides, RPE, FC max et V max en commentaire). Une copie `.bak` est faite avant. Refuse si le Journal existe déjà.
+
 ## 3. Carte des parcours
 
     python download_openrunner.py --activity   # JSON manquants → data/openrunner/<id>.json

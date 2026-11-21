@@ -29,7 +29,7 @@ def plot_fit(fit_df):
 def show_resume(my_df):
     km_df = my_df['km']
     moy_df = my_df['moy']
-    type_df = my_df['type']
+    type_df = my_df['type'].astype(object)  # all-empty column is float
     elev_df = my_df['elev']
     kmsum_df = my_df['week_sum']
 

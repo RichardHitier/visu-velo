@@ -37,7 +37,8 @@ def ods_to_df(file_path):
     pd.set_option('display.max_rows', None)
 
     my_df = my_df[['type', 'km', 'temps', 'elev', 'zone', 'moy']]
-    my_df.dropna(inplace=True)
+    # keep every ride with km, even without type or zone
+    my_df = my_df.dropna(subset=['km'])
     my_df.index = pd.to_datetime(my_df.index)
 
     first = my_df.index[0]
