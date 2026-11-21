@@ -3,6 +3,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import locale
+import math
+from datetime import timedelta
+
+from matplotlib.cm import ScalarMappable
+from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.patches import Rectangle
+
+# Sequential blue ramp (light -> dark) for weekly km; empty weeks stay gray
+WEEK_RAMP = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"]
+EMPTY_WEEK = "#f0efec"
+DARK_INK = "#333333"
 
 
 def plot_fit(fit_df):
@@ -193,4 +204,56 @@ def show_resume(my_df):
     ax3.tick_params(axis='x', which='major', length=1.1, pad=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
 
+    return fig
+
+
+def plot_weekly_grid(weeks_km, columns=13):
+    """Draw one square per week, colored by its km, `columns` weeks a row.
+
+    weeks_km is [(monday, km)] oldest first (see intervals.weekly_km);
+    rows read top to bottom, each labeled with its first Monday.
+    """
+    locale.setlocale(locale.LC_TIME, "fr_FR.utf8")
+    cmap = LinearSegmentedColormap.from_list("week_km", WEEK_RAMP)
+    top = max(km for _, km in weeks_km) or 1
+    norm = Normalize(vmin=0, vmax=top)
+    rows = math.ceil(len(weeks_km) / columns)
+
+    fig, ax = plt.subplots(figsize=(14, 5))
+    for i, (monday, km) in enumerate(weeks_km):
+        row, col = divmod(i, columns)
+        y = rows - 1 - row  # oldest weeks on top
+        color = cmap(norm(km)) if km else EMPTY_WEEK
+        ax.add_patch(
+            Rectangle((col + 0.05, y + 0.05), 0.9, 0.9, facecolor=color)
+        )
+        ink = "white" if norm(km) > 0.55 else DARK_INK
+        ax.text(col + 0.5, y + 0.78, f"{monday:%d/%m}", ha="center",
+                va="center", color=ink, fontsize=8, alpha=0.8)
+        ax.text(col + 0.5, y + 0.42, f"{km}", ha="center", va="center",
+                color=ink, fontsize=15, weight="bold")
+
+    ax.set_xlim(0, columns)
+    ax.set_ylim(0, rows)
+    ax.set_aspect("equal")
+    ax.set_xticks([])
+    ax.set_yticks(
+        [rows - 1 - r + 0.5 for r in range(rows)],
+        [f"{weeks_km[r * columns][0]:%d %b %Y}" for r in range(rows)],
+    )
+    ax.tick_params(length=0, labelsize=11)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    total = sum(km for _, km in weeks_km)
+    first = weeks_km[0][0]
+    last = weeks_km[-1][0] + timedelta(days=6)
+    ax.set_title(
+        f"km par semaine : {total} km sur {len(weeks_km)} semaines"
+        f"  ({first:%d %b %Y} → {last:%d %b %Y})",
+        fontsize=14, color=DARK_INK, pad=12,
+    )
+    fig.colorbar(ScalarMappable(norm=norm, cmap=cmap), ax=ax,
+                 label="km / semaine", shrink=0.8, pad=0.02)
+    fig.tight_layout()
     return fig

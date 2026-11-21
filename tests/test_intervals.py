@@ -14,6 +14,7 @@ from velo_tools.intervals import (
     clean_name,
     dominant_zone,
     rides_to_rows,
+    weekly_km,
 )
 from velo_tools.journal import (
     _cell_at,
@@ -209,3 +210,20 @@ def test_append_rides_drops_stale_totals(journal):
 def test_append_rides_refuses_overflow(journal):
     with pytest.raises(ValueError, match="empty Journal rows"):
         append_rides(journal, [activity_to_row(MALVIES)] * 1000)
+
+
+def test_weekly_km_sums_rides_per_week():
+    last_monday = date(2026, 11, 16)
+    rows = [
+        {"date": date(2026, 11, 17), "km": 30},  # Tuesday, last week
+        {"date": date(2026, 11, 22), "km": 12},  # Sunday, same week
+        {"date": date(2026, 11, 2), "km": 40},  # two weeks before
+        {"date": date(2025, 1, 6), "km": 99},  # before the 52 weeks
+    ]
+    weeks = weekly_km(rows, last_monday)
+    assert len(weeks) == 52
+    assert weeks[0][0] == date(2025, 11, 24)
+    assert weeks[-1] == (date(2026, 11, 16), 42)
+    assert weeks[-2] == (date(2026, 11, 9), 0)
+    assert weeks[-3] == (date(2026, 11, 2), 40)
+    assert sum(km for _, km in weeks) == 82

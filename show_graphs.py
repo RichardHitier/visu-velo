@@ -1,9 +1,12 @@
 import os
+import sys
+from datetime import date, timedelta
 from os.path import basename, splitext
 
 import matplotlib.pyplot as plt
 
-from velo_tools.graphers import show_resume, plot_fit
+from velo_tools.graphers import show_resume, plot_fit, plot_weekly_grid
+from velo_tools.intervals import fetch_activities, rides_to_rows, weekly_km
 from velo_tools.readers import ods_to_df, summarize, fit_to_df
 
 
@@ -27,6 +30,29 @@ def plot_file(filename, _show_to_screen=False):
         plt.show()
     else:
         fig.savefig(image_filename)
+        print(f"Saved figure into {image_filename}")
+
+
+def plot_weeks(_show_to_screen=False, weeks=52):
+    """PNG of km per week over the last `weeks` weeks, from intervals.icu."""
+    try:
+        api_key = os.environ["INTERVALS_API_KEY"]
+        athlete_id = os.environ["INTERVALS_ATHLETE_ID"]
+    except KeyError as missing:
+        sys.exit(f"Missing environment variable {missing}")
+
+    today = date.today()
+    last_monday = today - timedelta(days=today.weekday())
+    first_monday = last_monday - timedelta(weeks=weeks - 1)
+    activities = fetch_activities(athlete_id, api_key, first_monday, today)
+    weeks_km = weekly_km(rides_to_rows(activities), last_monday, weeks)
+    fig = plot_weekly_grid(weeks_km)
+
+    if _show_to_screen:
+        plt.show()
+    else:
+        image_filename = f"semaines_{today.isoformat()}.png"
+        fig.savefig(image_filename, dpi=120)
         print(f"Saved figure into {image_filename}")
 
 
@@ -82,5 +108,8 @@ if __name__ == "__main__":
         show_to_screen = len(sys.argv) >= 4 and sys.argv[3] == 'show'
         plot_file(file, show_to_screen)
 
+    elif data_type == 'weeks':
+        plot_weeks(len(sys.argv) >= 3 and sys.argv[2] == 'show')
+
     else:
-        print("First arg should be in [fit, bike, plot, print]")
+        print("First arg should be in [fit, bike, plot, print, weeks]")
