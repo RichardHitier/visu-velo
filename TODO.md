@@ -36,6 +36,7 @@ On en choisit un, puis il est codé jusqu'au bout.
 ### 5. Nouvelles idées (2026-11-19)
 - [ ] Télécharger les parcours depuis intervals.icu et les afficher dans le web.
 - [ ] ods 2 png : ajouter un panneau des temps qui montre les barres en temps (durée), pas en distance.
+- [ ] [2026-11-21] Visualiser / analyser les sorties Bryton (sources : Bryton Active, intervals.icu, compteur ; FIT dans `data/bryton-fits/`).
 
 ## Décisions
 
